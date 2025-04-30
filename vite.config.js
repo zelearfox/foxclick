@@ -8,12 +8,15 @@ export default defineConfig({
     tailwindcss()
   ],
   server: {
+    watch: {
+      ignored: ['**/*.json']
+    },
     proxy: {
       '/socket.io': {
         target: 'ws://localhost:3001',
         ws: true,
         changeOrigin: true
-      }
+      },
     },
     allowedHosts: ['foxclick.therikky.xyz']
   }
