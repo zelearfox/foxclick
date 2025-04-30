@@ -55,10 +55,10 @@ process.on('SIGINT', () => {
   process.exit();
 });
 
-app.use(express.static('../dist'));
+app.use(express.static(path.join(__dirname, '../dist')));
 
 app.get('*', (req, res) => {
-  res.sendFile('index.html', { root: '../dist/' })
+  res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
 
 const PORT = 3000;
