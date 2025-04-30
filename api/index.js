@@ -33,7 +33,6 @@ function saveClicks() {
   try {
     const data = JSON.stringify({ totalClicks });
     fs.writeFileSync(CLICKS_FILE, data);
-    console.log(`Saved ${totalClicks} clicks to storage`);
   } catch (err) {
     console.error('Error saving clicks:', err);
   }
@@ -56,7 +55,13 @@ process.on('SIGINT', () => {
   process.exit();
 });
 
-const PORT = process.env.PORT || 3001;
+app.use(express.static('../dist'));
+
+app.get('*', (req, res) => {
+  res.sendFile('index.html', { root: '../dist/' })
+});
+
+const PORT = 3000;
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
