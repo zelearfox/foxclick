@@ -10,6 +10,15 @@ function App() {
   const [foxEmojis, setFoxEmojis] = useState([]);
   const prevCountRef = useRef(count);
 
+  document.addEventListener('keydown', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    return false;
+  }, true);
+
+  debugger;
+
   useEffect(() => {
     if (count > prevCountRef.current) {
       const newFox = {
@@ -29,6 +38,7 @@ function App() {
   }, [foxEmojis]);
 
   useEffect(() => {
+    debugger;
     socket.on('connect', () => setLoading(false));
     socket.on('update', setCount);
     
@@ -40,7 +50,7 @@ function App() {
   const handleClick = () => socket.emit('click');
 
   return (
-    <div className='flex flex-col items-center justify-center w-full h-[100svh]'>
+    <div className='flex flex-col items-center justify-center w-full h-[100svh]' onContextMenu={(e) => e.preventDefault()}>
       <style>{`
         @keyframes foxFlight {
           0% { 
