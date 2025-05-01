@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 const socket = io();
 
 function App() {
-  const [isLoading, setLoading] = useState(true);
+  const [status, setStatus] = useState('loading');
   const [count, setCount] = useState(0);
   const [isPressed, setIsPressed] = useState(false);
   const [foxEmojis, setFoxEmojis] = useState([]);
@@ -39,8 +39,9 @@ function App() {
 
   useEffect(() => {
     debugger;
-    socket.on('connect', () => setLoading(false));
+    socket.on('connect', () => setStatus('ready'));
     socket.on('update', setCount);
+    socket.on('autoclicker', () => setStatus('autoclicker'));
     
     return () => {
       socket.off('update');
@@ -71,41 +72,59 @@ function App() {
         }
       `}</style>
 
-      {isLoading ? (
-        <h1>Загрузка...</h1>
-      ) : (
-        <div className="flex flex-col gap-20 items-center">
-          <div className="relative">
-            <h1 className='flex items-center gap-3 text-[3.5svh] font-bold'>
-              <span>Накликано лисов:</span>
-              <span className='text-orange-500 relative pr-2'>
-                {count}
-                {foxEmojis.map(fox => (
-                  <span 
-                    key={fox.id} 
-                    className="fox-emoji" 
-                    style={{ left: `calc(50% + ${fox.offset}px)` }}
-                  >
-                    🦊
-                  </span>
-                ))}
-              </span>
-            </h1>
-          </div>
+      {(() => {
+        switch (status) {
+          case 'loading':
+            return (<h1>Загрузка...</h1>);
+          
+          case 'autoclicker':
+            return (<h1 className='text-center text-red-500 font-bold'>Вы подозреваетесь в использовании автокликера!</h1>);
+          
+          case 'banned':
+            return null;
 
-          <button
-            className={`bg-orange-500 h-[30svh] w-[30svh] rounded-full flex items-center 
-              justify-center text-[6svh] font-bold cursor-pointer transition-transform 
-              duration-100 ${isPressed ? 'scale-95' : ''}`}
-            onClick={handleClick}
-            onMouseDown={() => setIsPressed(true)}
-            onMouseUp={() => setIsPressed(false)}
-            onMouseLeave={() => setIsPressed(false)}
-          >
-            КЛИК
-          </button>
-        </div>
-      )}
+          case 'auth':
+            return null;
+          
+          case 'ready':
+            return (
+              <div className="flex flex-col gap-20 items-center">
+                <div className="relative">
+                  <h1 className='flex items-center gap-3 text-[3.5svh] font-bold'>
+                    <span>Накликано лисов:</span>
+                    <span className='text-orange-500 relative pr-2'>
+                      {count}
+                      {foxEmojis.map(fox => (
+                        <span 
+                          key={fox.id} 
+                          className="fox-emoji" 
+                          style={{ left: `calc(50% + ${fox.offset}px)` }}
+                        >
+                          🦊
+                        </span>
+                      ))}
+                    </span>
+                  </h1>
+                </div>
+
+                <button
+                  className={`bg-orange-500 h-[30svh] w-[30svh] rounded-full flex items-center 
+                    justify-center text-[6svh] font-bold cursor-pointer transition-transform 
+                    duration-100 ${isPressed ? 'scale-95' : ''}`}
+                  onClick={handleClick}
+                  onMouseDown={() => setIsPressed(true)}
+                  onMouseUp={() => setIsPressed(false)}
+                  onMouseLeave={() => setIsPressed(false)}
+                >
+                  КЛИК
+                </button>
+              </div>
+            )
+
+          default:
+            return null;
+        }
+      })()}
     </div>
   );
 }

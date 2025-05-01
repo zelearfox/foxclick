@@ -21,6 +21,7 @@ const io = new Server(httpServer, {
 });
 
 const CLICKS_FILE = path.join(process.cwd(), 'clicks.json');
+const MAX_CLICKS_PER_SECOND = 14;
 
 let totalClicks = 0;
 try {
@@ -45,11 +46,29 @@ function saveClicks() {
 const saveInterval = setInterval(saveClicks, 10000);
 
 io.on('connection', (socket) => {
+  const clickTimestamps = [];
+  let isBanned = false;
+
   socket.emit('update', totalClicks);
-  
+
   socket.on('click', () => {
+    if (isBanned) return;
+
     totalClicks++;
     io.emit('update', totalClicks);
+
+    const now = Date.now();
+    clickTimestamps.push(now);
+
+    while (clickTimestamps.length > 0 && now - clickTimestamps[0] > 1000) {
+      clickTimestamps.shift();
+    }
+
+    if (clickTimestamps.length > MAX_CLICKS_PER_SECOND) {
+      isBanned = true;
+      socket.emit('autoclicker', 1);
+      setTimeout(() => socket.disconnect(true), 100);
+    }
   });
 });
 
