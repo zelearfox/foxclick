@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import { crashBrowser } from 'devtools-detector';
 import useIsDevToolsOpen from 'react-devtools-detector';
-const App = lazy(() => import('./App.jsx'));
+import App from './App';
 
 function DETECT({ children }) {
   const isDetected = useIsDevToolsOpen({
@@ -25,9 +25,7 @@ function DETECT({ children }) {
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <DETECT>
-      <Suspense>
-        <App />
-      </Suspense>
+      <App />
     </DETECT>
   </StrictMode>,
 )
