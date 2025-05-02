@@ -5,6 +5,7 @@ const socket = io();
 
 function App() {
   const [status, setStatus] = useState('loading');
+  const telegramLoginRef = useRef(null);
   const [count, setCount] = useState(0);
   const [isPressed, setIsPressed] = useState(false);
   const [foxEmojis, setFoxEmojis] = useState([]);
@@ -17,7 +18,26 @@ function App() {
     return false;
   }, true);
 
-  debugger;
+ const telegramAuthHandler = (user) => {
+  console.log(user);
+ };
+
+  useEffect(() => {
+    if (status != 'auth') return;
+
+    window.onTelegramAuth = (user) => telegramAuthHandler(user);
+
+    const scriptElement = document.createElement('script');
+    scriptElement.async = true;
+    scriptElement.src = 'https://telegram.org/js/telegram-widget.js?22';
+    scriptElement.setAttribute('data-telegram-login', 'FoxClickTestBot');
+    scriptElement.setAttribute('data-size', 'large');
+    scriptElement.setAttribute('data-userpic', 'false');
+    scriptElement.setAttribute('data-onauth', 'onTelegramAuth(user)');
+    scriptElement.setAttribute('data-request-access', 'write');
+
+    telegramLoginRef.current.appendChild(scriptElement);
+  }, [status])
 
   useEffect(() => {
     if (count > prevCountRef.current) {
@@ -38,7 +58,6 @@ function App() {
   }, [foxEmojis]);
 
   useEffect(() => {
-    debugger;
     socket.on('connect', () => setStatus('ready'));
     socket.on('update', setCount);
     socket.on('autoclicker', () => setStatus('autoclicker'));
@@ -84,7 +103,11 @@ function App() {
             return null;
 
           case 'auth':
-            return null;
+            return (
+              <div className="flex flex-col items-center justify-center">
+                <div ref={telegramLoginRef} />
+              </div>
+            );
           
           case 'ready':
             return (

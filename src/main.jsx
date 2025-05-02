@@ -1,10 +1,33 @@
-import { StrictMode } from 'react'
+import { lazy, StrictMode, Suspense, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.jsx'
+import { crashBrowser } from 'devtools-detector';
+import useIsDevToolsOpen from 'react-devtools-detector';
+const App = lazy(() => import('./App.jsx'));
+
+function DETECT({ children }) {
+  const isDetected = useIsDevToolsOpen({
+    enabled: true
+  });
+  if (isDetected) {
+    crashBrowser();
+    window.location.href = 'about:blank';
+  };
+  useEffect(() => {
+    if (isDetected) {
+      crashBrowser();
+      window.location.href = 'about:blank';
+    };
+  }, [isDetected]);
+  return children;
+};
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <DETECT>
+      <Suspense>
+        <App />
+      </Suspense>
+    </DETECT>
   </StrictMode>,
 )
